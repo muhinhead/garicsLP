@@ -1,0 +1,118 @@
+<head>
+<meta charset="UTF-8">
+<title>{{.Title}}</title>
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 6px;
+    }
+    th {
+        background-color: #007BFF; /* Blue background */
+        color: white;              /* White text */
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        padding-right: 20px; /* space for arrow */
+    }
+    tr:nth-child(even) {
+        background-color: #ffffff; /* Even rows */
+    }
+    tr:nth-child(odd) {
+        background-color: #dee0d2; /* Odd rows */
+    }
+    th.sorted {
+        font-style: italic;
+    }
+    th::after {
+        content: "";
+        padding-left: 6px;
+    }
+
+    th.sorted.asc::after {
+        content: "▲";
+    }
+
+    th.sorted.desc::after {
+        content: "▼";
+    }
+    .sort-arrow {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+    }
+</style>
+<script>
+    let currentSortedCol = -1;
+    let sortAsc = true;
+
+    function sortTable(colIndex) {
+        const table = document.querySelector("table");
+        const rows = Array.from(table.rows).slice(1);
+
+        // Determine sort direction
+        if (colIndex === currentSortedCol) {
+            sortAsc = !sortAsc;
+        } else {
+            sortAsc = true;
+            currentSortedCol = colIndex;
+        }
+
+        // Remove sorted class from all headers
+        document.querySelectorAll("th").forEach(th => {
+            th.classList.remove("sorted", "asc", "desc");
+        });
+
+        // Add sorted class to the active header
+        const header = document.querySelectorAll("th")[colIndex];
+        header.classList.add("sorted", sortAsc ? "asc" : "desc");
+
+        // Sort rows
+        rows.sort((a, b) => {
+            const x = a.cells[colIndex].innerText.toLowerCase();
+            const y = b.cells[colIndex].innerText.toLowerCase();
+
+            if (!isNaN(x) && !isNaN(y)) {
+                return sortAsc ? x - y : y - x;
+            }
+            return sortAsc ? x.localeCompare(y) : y.localeCompare(x);
+        });
+
+        rows.forEach(row => table.appendChild(row));
+    }
+</script>
+</head>
+<body>
+<h1 style="color:#007BFF;">{{.Title}}</h1>
+<table>
+    <tr>
+        <th onclick="sortTable(0)">ID<span class="sort-arrow"></span></th>
+        <th onclick="sortTable(1)">Box<span class="sort-arrow"></span></th>
+        <th onclick="sortTable(2)">Artist<span class="sort-arrow"></span></th>
+        <th onclick="sortTable(3)">Header<span class="sort-arrow"></span></th>
+        <th onclick="sortTable(4)">LPs<span class="sort-arrow"></span></th>
+        <th onclick="sortTable(5)">Years<span class="sort-arrow"></span></th>
+        <th onclick="sortTable(6)">Years2<span class="sort-arrow"></span></th>
+        <th onclick="sortTable(7)">Label<span class="sort-arrow"></span></th>
+        <th onclick="sortTable(8)">Country<span class="sort-arrow"></span></th>
+        <th onclick="sortTable(9)">Notes<span class="sort-arrow"></span></th>
+    </tr>
+    {{range .LongPlays}}
+    <tr>
+        <td>{{.ID}}</td>
+        <td>{{if .Box.Valid}}{{.Box.Int64}}{{end}}</td>
+        <td>{{if .Artist.Valid}}{{.Artist.String}}{{end}}</td>
+        <td>{{if .Header.Valid}}{{.Header.String}}{{end}}</td>
+        <td>{{if .Lps.Valid}}{{.Lps.Int64}}{{end}}</td>
+        <td>{{if .Years.Valid}}{{.Years.String}}{{end}}</td>
+        <td>{{if .Years2.Valid}}{{.Years2.String}}{{end}}</td>
+        <td>{{if .Label.Valid}}{{.Label.String}}{{end}}</td>
+        <td>{{if .Country.Valid}}{{.Country.String}}{{end}}</td>
+        <td>{{if .Notes.Valid}}{{.Notes.String}}{{end}}</td>
+    </tr>
+    {{end}}
+</table>
+</body>
+</html>
